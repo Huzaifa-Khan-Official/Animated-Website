@@ -1,6 +1,8 @@
 import React, { useRef, useState } from 'react'
 import Button from './Button';
 import { TiLocationArrow } from 'react-icons/ti';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
 
 const Hero = () => {
     const [currentIndex, setCurrentIndex] = useState(1);
@@ -24,12 +26,41 @@ const Hero = () => {
         setCurrentIndex(upcomingVideoIndex);
     }
 
+    useGSAP(() => {
+        if (hasClicked) {
+            gsap.set("#next-video", {
+                visibility: "visible"
+            })
+
+            gsap.to("#next-video", {
+                transformOrigin: "center center",
+                scale: 1,
+                width: "100%",
+                height: "100%",
+                duration: 1,
+                ease: "power1.inOut",
+                onStart: () => nextVideoRef.current.play(),
+            })
+
+            gsap.from("#current-video", {
+                transformOrigin: "center center",
+                scale: 0,
+                duration: 1.5,
+                ease: "power1.inOut",
+            })
+        }
+
+    }, {
+        dependencies: [currentIndex],
+        revertOnUpdate: true,
+    })
+
     const getVideoSrc = (index) => `videos/hero-${index}.mp4`;
     return (
         <div className='relative h-dvh w-screen overflow-x-hidden'>
             <div id='video-frame' className='relative z-10 h-dvh w-screen overflow-hidden rounded-lg bg-blue-75'>
                 <div>
-                    <div className='mask-clip-path absolute-center absolute z-50 siz-64 cursor-pointer overflow-hidden rounded-lg'>
+                    <div className='mask-clip-path absolute-center absolute z-50 size-64 cursor-pointer overflow-hidden rounded-lg'>
                         <div onClick={handleMiniVideoClick} className='origin-center scale-50 opacity-0 transition-all duration-500 ease-in hover:scale-100 hover:opacity-100'>
                             <video
                                 ref={nextVideoRef}
@@ -49,7 +80,7 @@ const Hero = () => {
                         loop
                         muted
                         id='next-video'
-                        className='absolute-center absolute invisible z-20 size-64 object-cover object-center'
+                        className='absolute-center invisible absolute z-20 size-64 object-cover object-center'
                         onLoadedData={handleVideoLoad}
                     />
 
